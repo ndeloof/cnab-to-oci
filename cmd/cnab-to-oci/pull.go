@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 
 	"github.com/docker/cnab-to-oci/remotes"
 	"github.com/docker/distribution/reference"
+	"github.com/docker/go/canonical/json"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +46,7 @@ func runPull(opts pullOptions) error {
 	if err != nil {
 		return err
 	}
-	bytes, err := json.MarshalIndent(b, "", "\t")
+	bytes, err := json.MarshalCanonical(b)
 	if err != nil {
 		return err
 	}
