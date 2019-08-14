@@ -20,6 +20,7 @@ type fixupOptions struct {
 	output             string
 	targetRef          string
 	insecureRegistries []string
+	autoUpdateBundle   bool
 }
 
 func fixupCmd() *cobra.Command {
@@ -37,6 +38,7 @@ func fixupCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&opts.output, "output", "o", "fixed-bundle.json", "specify the output file")
 	cmd.Flags().StringVarP(&opts.targetRef, "target", "t", "", "reference where the bundle will be pushed")
 	cmd.Flags().StringSliceVar(&opts.insecureRegistries, "insecure-registries", nil, "Use plain HTTP for those registries")
+	cmd.Flags().BoolVar(&opts.autoUpdateBundle, "auto-update-bundle", false, "Updates the bundle image properties with the one resolved on the registry")
 	return cmd
 }
 
@@ -54,7 +56,13 @@ func runFixup(opts fixupOptions) error {
 		return err
 	}
 	// TODO: store or print the relocation map
-	relocationMap, err := remotes.FixupBundle(context.Background(), &b, ref, createResolver(opts.insecureRegistries), remotes.WithEventCallback(displayEvent))
+	fixupOptions := []remotes.FixupOption{
+		remotes.WithEventCallback(displayEvent),
+	}
+	if opts.autoUpdateBundle {
+		fixupOptions = append(fixupOptions, remotes.WithAutoBundleUpdate())
+	}
+	relocationMap, err := remotes.FixupBundle(context.Background(), &b, ref, createResolver(opts.insecureRegistries), fixupOptions...)
 	fmt.Println("Relocation map:", relocationMap)
 	if err != nil {
 		return err

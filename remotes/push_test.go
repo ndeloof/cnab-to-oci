@@ -2,7 +2,6 @@ package remotes
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -11,6 +10,7 @@ import (
 	"github.com/docker/cnab-to-oci/converter"
 	"github.com/docker/cnab-to-oci/tests"
 	"github.com/docker/distribution/reference"
+	"github.com/docker/go/canonical/json"
 	ocischemav1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"gotest.tools/assert"
 )
@@ -21,7 +21,7 @@ const (
   "manifests": [
     {
       "mediaType":"application/vnd.oci.image.manifest.v1+json",
-      "digest":"sha256:c2d924f51be1192113cf24beb537bda557270deef9c104204e89afcee685b160",
+      "digest":"sha256:e3eb67b9ca812e0d594f7dbf6e9071b4dc9d06ca338a3e6f851f22f06cf16860",
       "size":189,
       "annotations":{
         "io.cnab.manifest.type":"config"
@@ -70,7 +70,7 @@ func TestPush(t *testing.T) {
 	pusher := &mockPusher{}
 	resolver := &mockResolver{pusher: pusher}
 	b := tests.MakeTestBundle()
-	expectedBundleConfig, err := json.Marshal(b)
+	expectedBundleConfig, err := json.MarshalCanonical(b)
 	assert.NilError(t, err)
 	ref, err := reference.ParseNamed("my.registry/namespace/my-app:my-tag")
 	assert.NilError(t, err)
@@ -125,7 +125,7 @@ func ExamplePush() {
 	// Output:
 	// {
 	//   "mediaType": "application/vnd.oci.image.index.v1+json",
-	//   "digest": "sha256:8e566d3ddbd45aea5c080b8566dcf341f16179ce84eaaf77066c94541e9fbd49",
+	//   "digest": "sha256:4b6f2d8802ec66b8738ba6d8a5e446433476d9f7d174b3d26dcf296ed05cb8cf",
 	//   "size": 1363
 	// }
 }

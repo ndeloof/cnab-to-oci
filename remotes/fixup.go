@@ -47,12 +47,12 @@ func FixupBundle(ctx context.Context, b *bundle.Bundle, ref reference.Named, res
 	}
 
 	relocationMap := bundle.ImageRelocationMap{}
-	if err := fixupImage(ctx, b.InvocationImages[0].BaseImage, relocationMap, cfg, events, cfg.invocationImagePlatformFilter); err != nil {
+	if err := fixupImage(ctx, &b.InvocationImages[0].BaseImage, relocationMap, cfg, events, cfg.invocationImagePlatformFilter); err != nil {
 		return nil, err
 	}
 	// Fixup images
 	for _, original := range b.Images {
-		if err := fixupImage(ctx, original.BaseImage, relocationMap, cfg, events, cfg.componentImagePlatformFilter); err != nil {
+		if err := fixupImage(ctx, &original.BaseImage, relocationMap, cfg, events, cfg.componentImagePlatformFilter); err != nil {
 			return nil, err
 		}
 	}
@@ -61,7 +61,7 @@ func FixupBundle(ctx context.Context, b *bundle.Bundle, ref reference.Named, res
 	return relocationMap, nil
 }
 
-func fixupImage(ctx context.Context, baseImage bundle.BaseImage, relocationMap bundle.ImageRelocationMap, cfg fixupConfig, events chan<- FixupEvent, platformFilter platforms.Matcher) error {
+func fixupImage(ctx context.Context, baseImage *bundle.BaseImage, relocationMap bundle.ImageRelocationMap, cfg fixupConfig, events chan<- FixupEvent, platformFilter platforms.Matcher) error {
 	log.G(ctx).Debugf("Updating entry in relocation map for %q", baseImage.Image)
 	ctx = withMutedContext(ctx)
 	notifyEvent, progress := makeEventNotifier(events, baseImage.Image, cfg.targetRef)
@@ -77,10 +77,26 @@ func fixupImage(ctx context.Context, baseImage bundle.BaseImage, relocationMap b
 	if err != nil {
 		return err
 	}
-	relocationMap[baseImage.Image] = newRef.String()
-	fmt.Printf("adding entry in relocation map: %v: %v", baseImage.Image, newRef.String())
 
-	// TODO: check if the relocation map should be updated here as well
+	relocationMap[baseImage.Image] = newRef.String()
+
+	// if the autoUpdateBundle flag is passed, mutate the bundle with the resolved digest, mediaType, and size
+	if cfg.autoBundleUpdate {
+		baseImage.Digest = fixupInfo.resolvedDescriptor.Digest.String()
+		baseImage.Size = uint64(fixupInfo.resolvedDescriptor.Size)
+		baseImage.MediaType = fixupInfo.resolvedDescriptor.MediaType
+	} else {
+		if baseImage.Digest != fixupInfo.resolvedDescriptor.Digest.String() {
+			return fmt.Errorf("image %q digest differs %q after fixup: %q", baseImage.Image, baseImage.Digest, fixupInfo.resolvedDescriptor.Digest.String())
+		}
+		if baseImage.Size != uint64(fixupInfo.resolvedDescriptor.Size) {
+			return fmt.Errorf("image %q size differs %d after fixup: %d", baseImage.Image, baseImage.Size, fixupInfo.resolvedDescriptor.Size)
+		}
+		if baseImage.MediaType != fixupInfo.resolvedDescriptor.MediaType {
+			return fmt.Errorf("image %q media type differs %q after fixup: %q", baseImage.Image, baseImage.MediaType, fixupInfo.resolvedDescriptor.MediaType)
+		}
+	}
+
 	if fixupInfo.sourceRef.Name() == fixupInfo.targetRepo.Name() {
 		notifyEvent(FixupEventTypeCopyImageEnd, "Nothing to do: image reference is already present in repository"+fixupInfo.targetRepo.String(), nil)
 		return nil
@@ -110,7 +126,7 @@ func fixupImage(ctx context.Context, baseImage bundle.BaseImage, relocationMap b
 	return nil
 }
 
-func fixupPlatforms(ctx context.Context, baseImage bundle.BaseImage, relocationMap bundle.ImageRelocationMap, fixupInfo *imageFixupInfo, sourceFetcher sourceFetcherAdder, filter platforms.Matcher) error {
+func fixupPlatforms(ctx context.Context, baseImage *bundle.BaseImage, relocationMap bundle.ImageRelocationMap, fixupInfo *imageFixupInfo, sourceFetcher sourceFetcherAdder, filter platforms.Matcher) error {
 	if filter == nil ||
 		(fixupInfo.resolvedDescriptor.MediaType != ocischemav1.MediaTypeImageIndex && fixupInfo.resolvedDescriptor.MediaType != images.MediaTypeDockerSchema2ManifestList) {
 		// no platform filter if platform is empty, or if the descriptor is not an OCI Index / Docker Manifest list
@@ -155,7 +171,7 @@ func fixupPlatforms(ctx context.Context, baseImage bundle.BaseImage, relocationM
 }
 
 func fixupBaseImage(ctx context.Context,
-	baseImage bundle.BaseImage,
+	baseImage *bundle.BaseImage,
 	targetRef reference.Named, //nolint: interfacer
 	resolver remotes.Resolver) (imageFixupInfo, error) {
 
