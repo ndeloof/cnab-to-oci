@@ -122,11 +122,93 @@ func TestFixupBundleFailsWithDifferentDigests(t *testing.T) {
 }
 
 func TestFixupBundleFailsWithDifferentSizes(t *testing.T) {
-	// TODO
+	index := ocischemav1.Manifest{}
+	bufManifest, err := json.Marshal(index)
+	assert.NilError(t, err)
+	fetcher := &mockFetcher{indexBuffers: []*bytes.Buffer{
+		// Manifest index
+		bytes.NewBuffer(bufManifest),
+	}}
+	pusher := &mockPusher{}
+	resolver := &mockResolver{
+		pusher:  pusher,
+		fetcher: fetcher,
+		resolvedDescriptors: []ocischemav1.Descriptor{
+			// Invocation image manifest descriptor
+			{
+				MediaType: ocischemav1.MediaTypeImageManifest,
+				Size:      43,
+				Digest:    "sha256:c0ffeea7866258751a261bae525a1842c7ff0662d4f34a355d5f36826abc0343",
+			},
+			{},
+		},
+	}
+
+	b := &bundle.Bundle{
+		SchemaVersion: "v1.0.0-WD",
+		InvocationImages: []bundle.InvocationImage{
+			{
+				BaseImage: bundle.BaseImage{
+					Image:     "my.registry/namespace/my-app-invoc",
+					ImageType: "docker",
+					Digest:    "sha256:c0ffeea7866258751a261bae525a1842c7ff0662d4f34a355d5f36826abc0343",
+					Size:      42,
+					MediaType: ocischemav1.MediaTypeImageManifest,
+				},
+			},
+		},
+		Name:    "my-app",
+		Version: "0.1.0",
+	}
+	ref, err := reference.ParseNamed("my.registry/namespace/my-app")
+	assert.NilError(t, err)
+	_, err = FixupBundle(context.TODO(), b, ref, resolver)
+	assert.ErrorContains(t, err, "size differs")
 }
 
 func TestFixupBundleFailsWithDifferentMediaTypes(t *testing.T) {
-	// TODO
+	index := ocischemav1.Manifest{}
+	bufManifest, err := json.Marshal(index)
+	assert.NilError(t, err)
+	fetcher := &mockFetcher{indexBuffers: []*bytes.Buffer{
+		// Manifest index
+		bytes.NewBuffer(bufManifest),
+	}}
+	pusher := &mockPusher{}
+	resolver := &mockResolver{
+		pusher:  pusher,
+		fetcher: fetcher,
+		resolvedDescriptors: []ocischemav1.Descriptor{
+			// Invocation image manifest descriptor
+			{
+				MediaType: ocischemav1.MediaTypeImageIndex,
+				Size:      42,
+				Digest:    "sha256:c0ffeea7866258751a261bae525a1842c7ff0662d4f34a355d5f36826abc0343",
+			},
+			{},
+		},
+	}
+
+	b := &bundle.Bundle{
+		SchemaVersion: "v1.0.0-WD",
+		InvocationImages: []bundle.InvocationImage{
+			{
+				BaseImage: bundle.BaseImage{
+					Image:     "my.registry/namespace/my-app-invoc",
+					ImageType: "docker",
+					Digest:    "sha256:c0ffeea7866258751a261bae525a1842c7ff0662d4f34a355d5f36826abc0343",
+					Size:      42,
+					MediaType: ocischemav1.MediaTypeImageManifest,
+				},
+			},
+		},
+		Name:    "my-app",
+		Version: "0.1.0",
+	}
+	ref, err := reference.ParseNamed("my.registry/namespace/my-app")
+	assert.NilError(t, err)
+	_, err = FixupBundle(context.TODO(), b, ref, resolver)
+	assert.ErrorContains(t, err, "media type differs")
 }
 
 func TestFixupPlatformShortPaths(t *testing.T) {

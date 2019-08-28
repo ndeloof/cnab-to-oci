@@ -80,7 +80,7 @@ func ConvertBundleToOCIIndex(b *bundle.Bundle, targetRef reference.Named,
 	return &result, nil
 }
 
-// GenerateRelocationMap TODO
+// GenerateRelocationMap generates the bundle relocation map
 func GenerateRelocationMap(ix *ocischemav1.Index, b *bundle.Bundle, originRepo reference.Named) (bundle.ImageRelocationMap, error) {
 	relocationMap := bundle.ImageRelocationMap{}
 

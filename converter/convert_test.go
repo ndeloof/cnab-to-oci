@@ -142,66 +142,6 @@ func TestGetConfigDescriptor(t *testing.T) {
 	assert.ErrorContains(t, err, "bundle config not found")
 }
 
-// func TestConvertFromOCIToBundle(t *testing.T) {
-// 	targetRef := "my.registry/namespace/my-app:0.1.0"
-// 	named, err := reference.ParseNormalizedNamed(targetRef)
-// 	assert.NilError(t, err)
-// 	ix := tests.MakeTestOCIIndex()
-// 	config := makeTestBundleConfig()
-// 	expected := tests.MakeTestBundle()
-
-// 	result, err := ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.NilError(t, err)
-// 	assert.DeepEqual(t, expected, result)
-
-// 	// Without title annotation
-// 	delete(ix.Annotations, ocischemav1.AnnotationTitle)
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "manifest is missing title annotation")
-
-// 	// Without version annotation
-// 	ix = tests.MakeTestOCIIndex()
-// 	delete(ix.Annotations, ocischemav1.AnnotationVersion)
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "manifest is missing version annotation")
-
-// 	// Invalid authors annotation
-// 	ix = tests.MakeTestOCIIndex()
-// 	ix.Annotations[ocischemav1.AnnotationAuthors] = "Some garbage"
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "unable to parse maintainers")
-
-// 	// Invalid keywords annotation
-// 	ix = tests.MakeTestOCIIndex()
-// 	ix.Annotations[CNABKeywordsAnnotation] = "Some garbage"
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "unable to parse keywords")
-
-// 	// bad media type
-// 	ix = tests.MakeTestOCIIndex()
-// 	ix.Manifests[1].MediaType = "Some garbage"
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "unsupported manifest descriptor")
-
-// 	// no cnab type (invocation/component)
-// 	ix = tests.MakeTestOCIIndex()
-// 	delete(ix.Manifests[1].Annotations, CNABDescriptorTypeAnnotation)
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "has no CNAB descriptor type annotation \"io.cnab.manifest.type\"")
-
-// 	// bad cnab type
-// 	ix = tests.MakeTestOCIIndex()
-// 	ix.Manifests[1].Annotations[CNABDescriptorTypeAnnotation] = "Some garbage"
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "invalid CNAB descriptor type \"Some garbage\" in descriptor")
-
-// 	// component name missing
-// 	ix = tests.MakeTestOCIIndex()
-// 	delete(ix.Manifests[2].Annotations, CNABDescriptorComponentNameAnnotation)
-// 	_, err = ConvertOCIIndexToBundle(ix, config, named)
-// 	assert.ErrorContains(t, err, "component name missing in descriptor")
-// }
-
 func TestGenerateRelocationMap(t *testing.T) {
 	targetRef := "my.registry/namespace/my-app:0.1.0"
 	named, err := reference.ParseNormalizedNamed(targetRef)

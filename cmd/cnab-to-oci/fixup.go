@@ -55,7 +55,7 @@ func runFixup(opts fixupOptions) error {
 	if err != nil {
 		return err
 	}
-	// TODO: store or print the relocation map
+
 	fixupOptions := []remotes.FixupOption{
 		remotes.WithEventCallback(displayEvent),
 	}
