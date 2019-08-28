@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/cnab-to-oci/remotes"
 	"github.com/docker/distribution/reference"
+	"github.com/docker/go/canonical/json"
 	"github.com/spf13/cobra"
 )
 
@@ -67,7 +67,7 @@ func runFixup(opts fixupOptions) error {
 	if err != nil {
 		return err
 	}
-	bundleJSON, err = json.MarshalIndent(b, "", "\t")
+	bundleJSON, err = json.MarshalCanonical(b)
 	if err != nil {
 		return err
 	}

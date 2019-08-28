@@ -135,11 +135,6 @@ func GenerateRelocationMap(ix *ocischemav1.Index, b *bundle.Bundle, originRepo r
 	return relocationMap, nil
 }
 
-func CheckAnnotations(ix *ocischemav1.Index, b *bundle.Bundle) bool {
-	// TODO
-	return true
-}
-
 func makeAnnotations(b *bundle.Bundle) (map[string]string, error) {
 	result := map[string]string{
 		CNABRuntimeVersionAnnotation:      b.SchemaVersion,
@@ -163,28 +158,6 @@ func makeAnnotations(b *bundle.Bundle) (map[string]string, error) {
 		result[CNABKeywordsAnnotation] = string(keywords)
 	}
 	return result, nil
-}
-
-func parseTopLevelAnnotations(annotations map[string]string, into *bundle.Bundle) error {
-	var ok bool
-	if into.Name, ok = annotations[ocischemav1.AnnotationTitle]; !ok {
-		return errors.New("manifest is missing title annotation " + ocischemav1.AnnotationTitle)
-	}
-	if into.Version, ok = annotations[ocischemav1.AnnotationVersion]; !ok {
-		return errors.New("manifest is missing version annotation " + ocischemav1.AnnotationVersion)
-	}
-	into.Description = annotations[ocischemav1.AnnotationDescription]
-	if maintainersJSON, ok := annotations[ocischemav1.AnnotationAuthors]; ok {
-		if err := json.Unmarshal([]byte(maintainersJSON), &into.Maintainers); err != nil {
-			return fmt.Errorf("unable to parse maintainers: %s", err)
-		}
-	}
-	if keywordsJSON, ok := annotations[CNABKeywordsAnnotation]; ok {
-		if err := json.Unmarshal([]byte(keywordsJSON), &into.Keywords); err != nil {
-			return fmt.Errorf("unable to parse keywords: %s", err)
-		}
-	}
-	return nil
 }
 
 func makeManifests(b *bundle.Bundle, targetReference reference.Named,

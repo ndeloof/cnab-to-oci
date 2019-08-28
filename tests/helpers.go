@@ -145,6 +145,7 @@ func MakeTestOCIIndex() *ocischemav1.Index {
 	}
 }
 
+// MakeRelocationMap generates a fake relocation map
 func MakeRelocationMap() bundle.ImageRelocationMap {
 	return bundle.ImageRelocationMap{
 		"my.registry/namespace/image-1":       "my.registry/namespace/my-app@sha256:d59a1aa7866258751a261bae525a1842c7ff0662d4f34a355d5f36826abc0341",

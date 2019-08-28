@@ -126,9 +126,18 @@ func fixupImage(ctx context.Context, baseImage *bundle.BaseImage, relocationMap 
 	return nil
 }
 
-func fixupPlatforms(ctx context.Context, baseImage *bundle.BaseImage, relocationMap bundle.ImageRelocationMap, fixupInfo *imageFixupInfo, sourceFetcher sourceFetcherAdder, filter platforms.Matcher) error {
+func fixupPlatforms(ctx context.Context,
+	baseImage *bundle.BaseImage,
+	relocationMap bundle.ImageRelocationMap,
+	fixupInfo *imageFixupInfo,
+	sourceFetcher sourceFetcherAdder,
+	filter platforms.Matcher) error {
+
+	logger := log.G(ctx)
+	logger.Debugf("Fixup platforms for image %v, with relocation map %v", baseImage, relocationMap)
 	if filter == nil ||
-		(fixupInfo.resolvedDescriptor.MediaType != ocischemav1.MediaTypeImageIndex && fixupInfo.resolvedDescriptor.MediaType != images.MediaTypeDockerSchema2ManifestList) {
+		(fixupInfo.resolvedDescriptor.MediaType != ocischemav1.MediaTypeImageIndex &&
+			fixupInfo.resolvedDescriptor.MediaType != images.MediaTypeDockerSchema2ManifestList) {
 		// no platform filter if platform is empty, or if the descriptor is not an OCI Index / Docker Manifest list
 		return nil
 	}

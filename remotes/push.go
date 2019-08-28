@@ -21,7 +21,13 @@ import (
 type ManifestOption func(*ocischemav1.Index) error
 
 // Push pushes a bundle as an OCI Image Index manifest
-func Push(ctx context.Context, b *bundle.Bundle, relocationMap bundle.ImageRelocationMap, ref reference.Named, resolver remotes.Resolver, allowFallbacks bool, options ...ManifestOption) (ocischemav1.Descriptor, error) {
+func Push(ctx context.Context,
+	b *bundle.Bundle,
+	relocationMap bundle.ImageRelocationMap,
+	ref reference.Named,
+	resolver remotes.Resolver,
+	allowFallbacks bool,
+	options ...ManifestOption) (ocischemav1.Descriptor, error) {
 	log.G(ctx).Debugf("Pushing CNAB Bundle %s", ref)
 
 	confManifestDescriptor, err := pushConfig(ctx, b, ref, resolver, allowFallbacks)
@@ -99,13 +105,20 @@ func pushDockerManifestList(ctx context.Context, b *bundle.Bundle, relocationMap
 	logger.Debug("Manifest list Descriptor")
 	logPayload(logger, indexDescriptor)
 
-	if err := pushPayload(ctx, resolver, ref.String(), indexDescriptor, indexPayload); err != nil {
+	if err := pushPayload(ctx,
+		resolver, ref.String(),
+		indexDescriptor,
+		indexPayload); err != nil {
 		return ocischemav1.Descriptor{}, err
 	}
 	return indexDescriptor, nil
 }
 
-func prepareIndex(b *bundle.Bundle, relocationMap bundle.ImageRelocationMap, ref reference.Named, confDescriptor ocischemav1.Descriptor, options ...ManifestOption) (ocischemav1.Descriptor, []byte, error) {
+func prepareIndex(b *bundle.Bundle,
+	relocationMap bundle.ImageRelocationMap,
+	ref reference.Named,
+	confDescriptor ocischemav1.Descriptor,
+	options ...ManifestOption) (ocischemav1.Descriptor, []byte, error) {
 	ix, err := convertIndexAndApplyOptions(b, relocationMap, ref, confDescriptor, options...)
 	if err != nil {
 		return ocischemav1.Descriptor{}, nil, err
@@ -127,7 +140,11 @@ type ociIndexWrapper struct {
 	MediaType string `json:"mediaType,omitempty"`
 }
 
-func convertIndexAndApplyOptions(b *bundle.Bundle, relocationMap bundle.ImageRelocationMap, ref reference.Named, confDescriptor ocischemav1.Descriptor, options ...ManifestOption) (*ocischemav1.Index, error) {
+func convertIndexAndApplyOptions(b *bundle.Bundle,
+	relocationMap bundle.ImageRelocationMap,
+	ref reference.Named,
+	confDescriptor ocischemav1.Descriptor,
+	options ...ManifestOption) (*ocischemav1.Index, error) {
 	ix, err := converter.ConvertBundleToOCIIndex(b, ref, confDescriptor, relocationMap)
 	if err != nil {
 		return nil, err
@@ -140,7 +157,11 @@ func convertIndexAndApplyOptions(b *bundle.Bundle, relocationMap bundle.ImageRel
 	return ix, nil
 }
 
-func prepareIndexNonOCI(b *bundle.Bundle, relocationMap bundle.ImageRelocationMap, ref reference.Named, confDescriptor ocischemav1.Descriptor, options ...ManifestOption) (ocischemav1.Descriptor, []byte, error) {
+func prepareIndexNonOCI(b *bundle.Bundle,
+	relocationMap bundle.ImageRelocationMap,
+	ref reference.Named,
+	confDescriptor ocischemav1.Descriptor,
+	options ...ManifestOption) (ocischemav1.Descriptor, []byte, error) {
 	ix, err := convertIndexAndApplyOptions(b, relocationMap, ref, confDescriptor, options...)
 	if err != nil {
 		return ocischemav1.Descriptor{}, nil, err
