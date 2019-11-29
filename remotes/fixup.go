@@ -95,16 +95,6 @@ func fixupImage(
 		baseImage.Digest = fixupInfo.resolvedDescriptor.Digest.String()
 		baseImage.Size = uint64(fixupInfo.resolvedDescriptor.Size)
 		baseImage.MediaType = fixupInfo.resolvedDescriptor.MediaType
-	} else {
-		if baseImage.Digest != fixupInfo.resolvedDescriptor.Digest.String() {
-			return fmt.Errorf("image %q digest differs %q after fixup: %q", baseImage.Image, baseImage.Digest, fixupInfo.resolvedDescriptor.Digest.String())
-		}
-		if baseImage.Size != uint64(fixupInfo.resolvedDescriptor.Size) {
-			return fmt.Errorf("image %q size differs %d after fixup: %d", baseImage.Image, baseImage.Size, fixupInfo.resolvedDescriptor.Size)
-		}
-		if baseImage.MediaType != fixupInfo.resolvedDescriptor.MediaType {
-			return fmt.Errorf("image %q media type differs %q after fixup: %q", baseImage.Image, baseImage.MediaType, fixupInfo.resolvedDescriptor.MediaType)
-		}
 	}
 
 	if pushed {
